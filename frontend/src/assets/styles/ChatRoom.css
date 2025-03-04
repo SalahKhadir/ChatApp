@@ -1,39 +1,57 @@
-.chatroom-container {
-    display: flex;
-    height: 89vh;
-    background: #3E4F69;
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
 }
 
+/* Chat Container */
+.chatroom-container {
+    display: flex;
+    min-height: 89vh; /* Ensure full screen height */
+    background: #2c3646;  /* Dark blue-gray */
+    color: #FFF;
+}
+
+/* Sidebar (Online Users) */
 .chatroom-sidebar {
     width: 25%;
-    background: #FFF8E7;
+    background: #F4F4F4;
     display: flex;
     flex-direction: column;
-    padding: 10px 0;
+    padding: 15px;
+    border-right: 2px solid #CCC;
+}
+
+.title {
+    color: #000000;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .chatroom-contacts {
     display: flex;
     flex-direction: column;
+    gap: 12px;
 }
 
 .chatroom-contact {
-    padding: 15px;
-    border-bottom: 2px solid #FFDB58;
-    font-size: 16px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #E8DB62;
     cursor: pointer;
+    transition: 0.3s;
+    font-weight: 500;
+    text-align: center;
 }
 
-.chatroom-contact strong {
-    display: block;
+.chatroom-contact:hover {
+    background: #584608;
+    color: #FFF;
 }
 
-.chatroom-contact p {
-    font-size: 12px;
-    color: gray;
-}
-
-/* Chatbox */
+/* Chat Box */
 .chatroom-box {
     flex: 1;
     display: flex;
@@ -42,40 +60,79 @@
     padding: 20px;
 }
 
+/* Messages */
 .chatroom-messages {
-    flex: 1;
+    flex-grow: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
+    padding: 10px;
+    min-height: 50vh;
+
 }
 
-/* Messages */
+/* Chat Bubbles */
 .chatroom-message {
-    max-width: 60%;
-    padding: 15px;
-    border-radius: 12px;
+    max-width: 55%;
+    padding: 12px 18px;
     font-size: 16px;
+    border-radius: 18px;
+    transition: 0.3s ease-in-out;
+    font-weight: 500;
+    word-wrap: break-word;
 }
 
+/* Sent Messages */
 .chatroom-sent {
-    background: #FFDB58;
+    background: #FFCC00;
     align-self: flex-end;
-    border-radius: 12px 12px 0 12px;
+    border-radius: 18px 18px 0 18px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+    color: #222;
 }
 
+/* Received Messages */
 .chatroom-received {
-    background: #FFF8E7;
+    background: #F4F4F4;
     align-self: flex-start;
-    border-radius: 12px 12px 12px 0;
+    border-radius: 18px 18px 18px 0;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    color: #222;
+}
+
+/* Sender Name */
+.chatroom-message strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    font-size: 14px;
+    font-style: italic;
+    color: #FFDB58;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 /* Input Box */
 .chatroom-input-box {
     display: flex;
-    padding: 10px;
-    background: #3E4F69;
-    border-radius: 12px;
+    padding: 12px;
+    background: #2C3E50;
+    border-radius: 10px;
+    align-items: center;
 }
 
 .chatroom-input {
@@ -84,15 +141,48 @@
     border-radius: 8px;
     border: none;
     font-size: 16px;
-    background: #FFF8E7;
+    background: #F4F4F4;
+    font-weight: 500;
+    transition: 0.3s;
 }
 
+.chatroom-input:focus {
+    outline: none;
+    background: #FFF;
+    box-shadow: 0 0 5px rgba(255, 204, 0, 0.6);
+}
+
+/* Send Button */
 .chatroom-send-button {
     margin-left: 10px;
     padding: 12px 20px;
-    background: #FFDB58;
-    border: 2px solid black;
+    background: #FFCC00;
+    border: none;
     font-size: 16px;
     cursor: pointer;
     border-radius: 8px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.chatroom-send-button:hover {
+    background: #FFC300;
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .chatroom-container {
+        flex-direction: column;
+    }
+
+    .chatroom-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #CCC;
+    }
+
+    .chatroom-box {
+        padding: 15px;
+    }
 }
