@@ -1,0 +1,158 @@
+/* General reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background-color: #fff8e7;
+}
+
+/* Page container specific */
+.auth-page__container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Navbar specific */
+.auth-navbar {
+    width: 100%;
+    height: 110px;
+    background-color: #ffdb58;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust container height to fill the remaining space below navbar */
+.container {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 110px); /* Subtract navbar height from total viewport height */
+}
+
+/* Form container specific */
+.auth-form__container {
+    background-color: #3e4f69;
+    color: white;
+    padding: 50px;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    flex: 1; /* Ensures the form container takes up the remaining space */
+    overflow-y: auto; /* Ensures scrolling if content exceeds the container's height */
+}
+
+/* Form header specific */
+.auth-form__header {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.auth-form__subheader {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* Label specific */
+.auth-form__label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Input specific */
+.auth-form__input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    margin-top: 5px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    outline: none;
+}
+
+.auth-form__input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Password container specific */
+.auth-form__password-container {
+    position: relative;
+    width: 100%;
+}
+
+.auth-form__password-container input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.auth-form__eye-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: white;
+    opacity: 0.7;
+}
+
+/* Button specific */
+.auth-form__button {
+    background-color: #ffdb58;
+    color: black;
+    font-weight: bold;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.auth-form__button:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+}
+
+/* Link specific */
+.auth-form__link {
+    color: #ffdb58;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.auth-form__link:hover {
+    text-decoration: underline;
+}
+
+.auth-illustration__container {
+    flex: 1;
+    background: linear-gradient(135deg, #e8db62, #fff8e7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+.logoimg{
+    width: 100px;
+    margin-left: 100px
+}
