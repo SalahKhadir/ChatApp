@@ -4,7 +4,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const WebSocket = require("ws");
 const authRoutes = require("./routes/auth");
-const Message = require("./models/Message"); // Import the Message model
+const groupRoutes = require("./routes/group");
+const Message = require("./models/Message");
+const Group = require("./models/Group");
 
 const app = express();
 const server = http.createServer(app);
@@ -12,31 +14,32 @@ const server = http.createServer(app);
 app.use(cors());
 app.use(express.json());
 app.use("/auth", authRoutes);
+app.use("/group", groupRoutes);
 
-const MONGO_URI = "mongodb://localhost:27017/chatapp"; // Change if using MongoDB Atlas
+const MONGO_URI = "mongodb://localhost:27017/chatapp"; // Update for production
 
 mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
-.then(() => console.log("✅ MongoDB Connected"))
-.catch((err) => console.log("❌ MongoDB Connection Error:", err));
+    .then(() => console.log("✅ MongoDB Connected"))
+    .catch((err) => console.log("❌ MongoDB Connection Error:", err));
 
 const wss = new WebSocket.Server({ server });
 
 let onlineUsers = {}; // Store connected users
 
-// Fetch previous messages between two users
+// Fetch previous messages (Private & Group)
 app.get("/messages/:user1/:user2", async (req, res) => {
     const { user1, user2 } = req.params;
 
     try {
         const messages = await Message.find({
             $or: [
-                { sender: user1, receiver: user2 },
-                { sender: user2, receiver: user1 }
+                { sender: user1, receiver: user2, isGroup: false },
+                { sender: user2, receiver: user1, isGroup: false }
             ]
-        }).sort({ createdAt: 1 }); // Sort by oldest messages first
+        }).sort({ createdAt: 1 });
 
         res.json(messages);
     } catch (error) {
@@ -64,38 +67,63 @@ wss.on("connection", (ws) => {
 
             } else if (data.type === "private_message") {
                 const { sender, receiver, text } = data;
-                
-                // Save message to database
-                const newMessage = new Message({ sender, receiver, text });
+
+                const newMessage = new Message({ sender, receiver, text, isGroup: false });
                 await newMessage.save();
 
                 const messageData = { type: "private_message", sender, text, private: true };
 
-                // Send message to receiver if online
+                // Notify receiver
                 if (onlineUsers[receiver]) {
                     onlineUsers[receiver].send(JSON.stringify(messageData));
                 }
-                
+
                 // Send message back to sender
                 if (onlineUsers[sender]) {
                     onlineUsers[sender].send(JSON.stringify(messageData));
                 }
-            } 
-            
+            }
+
+            else if (data.type === "group_message") {
+                const { sender, group, text } = data;
+
+                // Save the message in MongoDB
+                const newMessage = new Message({ sender, receiver: group, text, isGroup: true });
+                await newMessage.save();
+
+                const messageData = { type: "group_message", sender, group, text };
+
+                // 🔥 Broadcast message to **all connected users**
+                wss.clients.forEach((client) => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(messageData));
+                    }
+                });
+            }
+
             else if (data.type === "fetch_messages") {
                 const { user1, user2 } = data;
 
-                // Fetch previous messages from MongoDB
                 const messages = await Message.find({
                     $or: [
-                        { sender: user1, receiver: user2 },
-                        { sender: user2, receiver: user1 }
+                        { sender: user1, receiver: user2, isGroup: false },
+                        { sender: user2, receiver: user1, isGroup: false }
                     ]
                 }).sort({ createdAt: 1 });
 
                 ws.send(JSON.stringify({ type: "chat_history", messages }));
-            } 
-            
+            }
+
+            else if (data.type === "fetch_group_messages") {
+                const { group } = data;
+
+                const messages = await Message.find({
+                    receiver: group, isGroup: true
+                }).sort({ createdAt: 1 });
+
+                ws.send(JSON.stringify({ type: "group_chat_history", messages }));
+            }
+
             else if (data.type === "typing") {
                 const { sender, receiver } = data;
 
@@ -115,7 +143,6 @@ wss.on("connection", (ws) => {
                 delete onlineUsers[user];
                 console.log(`🔴 ${user} disconnected`);
 
-                // Update online users list
                 const usersList = Object.keys(onlineUsers);
                 usersList.forEach((user) => {
                     if (onlineUsers[user]) {

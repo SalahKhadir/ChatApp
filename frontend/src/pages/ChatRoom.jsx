@@ -1,51 +1,60 @@
-import { useState, useEffect, useRef } from "react";
+import {useState, useEffect, useRef} from "react";
 import "../assets/styles/ChatRoom.css";
 
 export default function ChatRoom() {
     const [conversations, setConversations] = useState({});
     const [inputMessage, setInputMessage] = useState("");
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedChat, setSelectedChat] = useState(null);
+    const [chatType, setChatType] = useState("private");
     const [onlineUsers, setOnlineUsers] = useState([]);
-    const [typingUser, setTypingUser] = useState(null); // Store who is typing
+    const [typingUser, setTypingUser] = useState(null);
+    const [globalChat] = useState("GlobalChat"); // Single group chat
     const socket = useRef(null);
     const username = localStorage.getItem("username");
 
     useEffect(() => {
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
         socket.current = new WebSocket("ws://localhost:5000");
 
         socket.current.onopen = () => {
-            console.log("✅ Connected to WebSocket server");
-            socket.current.send(JSON.stringify({ type: "login", username }));
+            socket.current.send(JSON.stringify({type: "login", username}));
         };
 
         socket.current.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log("📩 Message received:", data);
 
             if (data.type === "online_users") {
                 setOnlineUsers(data.users.filter(user => user !== username));
-            }
-            else if (data.type === "private_message") {
+            } else if (data.type === "private_message" || data.type === "group_message") {
                 setConversations((prev) => {
-                    const updated = { ...prev };
-                    if (!updated[data.sender]) updated[data.sender] = [];
-                    updated[data.sender].push({ sender: data.sender, text: data.text });
-                    return updated;
+                    const chatKey = data.type === "group_message" ? data.group : data.sender;
+                    const updated = {...prev};
+                    if (!updated[chatKey]) updated[chatKey] = [];
+                    updated[chatKey].push({sender: data.sender, text: data.text});
+                    return {...updated};  // Ensure a fresh copy is returned for state update
                 });
-            }
-            else if (data.type === "chat_history") {
+
+                if (Notification.permission === "granted" && data.sender !== username) {
+                    new Notification(`💬 New message from ${data.sender}`, {
+                        body: data.text,
+                        icon: "/public/logo.png"
+                    });
+                }
+            } else if (data.type === "chat_history" || data.type === "group_chat_history") {
                 setConversations((prev) => ({
                     ...prev,
-                    [selectedUser]: data.messages.map(msg => ({
+                    [selectedChat]: data.messages.map(msg => ({
                         sender: msg.sender === username ? "Me" : msg.sender,
                         text: msg.text
                     }))
                 }));
-            }
-            else if (data.type === "typing") {
+            } else if (data.type === "typing") {
                 if (data.sender !== username) {
                     setTypingUser(data.sender);
-                    setTimeout(() => setTypingUser(null), 2000); // Remove after 2 sec
+                    setTimeout(() => setTypingUser(null), 2000);
                 }
             }
         };
@@ -55,14 +64,17 @@ export default function ChatRoom() {
         };
     }, []);
 
-    const selectChatUser = async (user) => {
-        setSelectedUser(user);
+    const selectChatUser = async (user, type) => {
+        setSelectedChat(user);
+        setChatType(type);
 
-        // Fetch message history from MongoDB
+        const endpoint = type === "group"
+            ? `http://localhost:5000/group/messages/${user}`
+            : `http://localhost:5000/messages/${username}/${user}`;
+
         try {
-            const response = await fetch(`http://localhost:5000/messages/${username}/${user}`);
+            const response = await fetch(endpoint);
             const messages = await response.json();
-            console.log("📜 Fetched Chat History:", messages);
 
             setConversations((prev) => ({
                 ...prev,
@@ -77,21 +89,22 @@ export default function ChatRoom() {
     };
 
     const sendMessage = () => {
-        if (inputMessage.trim() === "" || !selectedUser) return;
+        if (inputMessage.trim() === "" || !selectedChat) return;
 
         const messageData = {
-            type: "private_message",
+            type: chatType === "group" ? "group_message" : "private_message",
             sender: username,
-            receiver: selectedUser,
+            receiver: selectedChat,
+            group: chatType === "group" ? selectedChat : null,
             text: inputMessage,
         };
 
         socket.current.send(JSON.stringify(messageData));
 
         setConversations((prev) => {
-            const updated = { ...prev };
-            if (!updated[selectedUser]) updated[selectedUser] = [];
-            updated[selectedUser].push({ sender: "Me", text: inputMessage });
+            const updated = {...prev};
+            if (!updated[selectedChat]) updated[selectedChat] = [];
+            updated[selectedChat].push({sender: "Me", text: inputMessage});
             return updated;
         });
 
@@ -99,24 +112,24 @@ export default function ChatRoom() {
     };
 
     const handleTyping = () => {
-        if (selectedUser) {
+        if (selectedChat) {
             socket.current.send(JSON.stringify({
                 type: "typing",
                 sender: username,
-                receiver: selectedUser
+                receiver: selectedChat
             }));
         }
     };
 
     return (
         <div className="chatroom-container">
-            {/* Sidebar for Online Users */}
             <div className="chatroom-sidebar">
-                <h3 className="title">Online Users</h3><br/>
+                <h3 className="title">Online Users</h3>
                 <div className="chatroom-contacts">
                     {onlineUsers.length > 0 ? (
                         onlineUsers.map((user, index) => (
-                            <div key={index} className="chatroom-contact" onClick={() => selectChatUser(user)}>
+                            <div key={index} className="chatroom-contact"
+                                 onClick={() => selectChatUser(user, "private")}>
                                 <strong>{user}</strong>
                                 <p>Click to chat</p>
                             </div>
@@ -125,38 +138,49 @@ export default function ChatRoom() {
                         <p>No online users</p>
                     )}
                 </div>
+
+                <h3 className="title">Global Chat</h3>
+                <div className="chatroom-contacts">
+                    <div className="chatroom-contact" onClick={() => selectChatUser(globalChat, "group")}>
+                        <strong>Global Chat</strong>
+                        <p>Join the group</p>
+                    </div>
+                </div>
             </div>
 
-            {/* Chat Box */}
             <div className="chatroom-box">
-                <h3>{selectedUser ? `Chat with ${selectedUser}` : ""}</h3>
+                <h3>{selectedChat ? `Chat with ${selectedChat}` : "Select a chat"}</h3>
                 <div className="chatroom-messages">
-                    {selectedUser && conversations[selectedUser]
-                        ? conversations[selectedUser].map((msg, index) => (
-                            <div key={index} className={`chatroom-message ${msg.sender === "Me" ? "chatroom-sent" : "chatroom-received"}`}>
+                    {selectedChat && conversations[selectedChat]
+                        ? conversations[selectedChat].map((msg, index) => (
+                            <div key={index}
+                                 className={`chatroom-message ${msg.sender === "Me" ? "chatroom-sent" : "chatroom-received"}`}>
                                 <strong>{msg.sender}:</strong> {msg.text}
                             </div>
                         ))
-                        : <p style={{ color: "#ccc" }}>No messages yet. Start the conversation!</p>}
+                        : <p>No messages yet. Start the conversation!</p>}
 
-                    {/* Typing Indicator */}
-                    {typingUser && typingUser === selectedUser && (
+                    {typingUser && typingUser === selectedChat && (
                         <p className="typing-indicator">{typingUser} is typing...</p>
                     )}
                 </div>
 
-                {/* Input Box */}
+                {/* 🛠 FIXED INPUT BOX AND BUTTON STYLING */}
                 <div className="chatroom-input-box">
                     <input
                         type="text"
+                        className="chatroom-input"  // Fixed class name
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         onKeyPress={handleTyping}
-                        placeholder={selectedUser ? `Message ${selectedUser}...` : "Select a user first"}
-                        className="chatroom-input"
-                        disabled={!selectedUser}
+                        placeholder="Type a message..."
+                        disabled={!selectedChat}
                     />
-                    <button className="chatroom-send-button" onClick={sendMessage} disabled={!selectedUser}>
+                    <button
+                        className="chatroom-send-button"  // Fixed class name
+                        onClick={sendMessage}
+                        disabled={!selectedChat}
+                    >
                         Send
                     </button>
                 </div>

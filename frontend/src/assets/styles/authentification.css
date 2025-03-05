@@ -3,104 +3,102 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Arial", sans-serif;
+    font-family: "Poppins", sans-serif;
 }
 
 html, body {
     width: 100%;
     height: 100%;
-    background-color: #fff8e7;
+    background: #FFF8E7;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Page container specific */
+/* Page container */
 .auth-page__container {
-    display: flex;
-    flex-direction: column;
     width: 100vw;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Navbar specific */
+/* Navbar */
 .auth-navbar {
     width: 100%;
-    height: 110px;
-    background-color: #ffdb58;
+    height: 100px;
+    background-color: #FFDB58;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
     font-weight: bold;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Adjust container height to fill the remaining space below navbar */
-.container {
-    display: flex;
-    flex: 1;
-    height: calc(100vh - 110px); /* Subtract navbar height from total viewport height */
-}
-
-/* Form container specific */
-.auth-form__container {
-    background-color: #3e4f69;
     color: white;
-    padding: 50px;
+    box-shadow: 0px 4px 10px rgb(88, 70, 8);
+}
+
+/* Form container */
+.container {
+    margin-top: 80px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     width: 50%;
+    max-width: 900px;
+    background: white;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.auth-form__container {
+    flex: 1;
+    padding: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
     gap: 20px;
-    border-radius: 10px;
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-    flex: 1; /* Ensures the form container takes up the remaining space */
-    overflow-y: auto; /* Ensures scrolling if content exceeds the container's height */
+    background: #ffffff;
+    border-radius: 8px;
 }
 
-/* Form header specific */
 .auth-form__header {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: bold;
-    margin-bottom: 5px;
+    color: #3E4F69;
 }
 
 .auth-form__subheader {
     font-size: 16px;
-    opacity: 0.9;
+    color: #707070;
 }
 
-/* Label specific */
 .auth-form__label {
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
+    color: #000000;
 }
 
-/* Input specific */
 .auth-form__input {
     width: 100%;
     padding: 12px;
-    border: none;
+    border: 1px solid #ccc;
     border-radius: 8px;
-    margin-top: 5px;
     font-size: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    transition: border 0.3s;
+}
+
+.auth-form__input:focus {
+    border: 1px solid #3E4F69;
     outline: none;
 }
 
-.auth-form__input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Password container specific */
 .auth-form__password-container {
     position: relative;
     width: 100%;
-}
-
-.auth-form__password-container input {
-    width: 100%;
-    padding-right: 40px;
 }
 
 .auth-form__eye-icon {
@@ -109,13 +107,11 @@ html, body {
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: white;
-    opacity: 0.7;
+    color: #555;
 }
 
-/* Button specific */
 .auth-form__button {
-    background-color: #ffdb58;
+    background-color: #FFDB58;
     color: black;
     font-weight: bold;
     border: none;
@@ -128,13 +124,13 @@ html, body {
 }
 
 .auth-form__button:hover {
-    opacity: 0.85;
-    transform: translateY(-2px);
+    background-color: #E8DB62;
+    color: #000000;
+    transform: scale(1.05);
 }
 
-/* Link specific */
 .auth-form__link {
-    color: #ffdb58;
+    color: #3E4F69;
     text-decoration: none;
     font-weight: bold;
     transition: all 0.3s ease;
@@ -144,15 +140,24 @@ html, body {
     text-decoration: underline;
 }
 
+/* Illustration section */
 .auth-illustration__container {
     flex: 1;
-    background: linear-gradient(135deg, #e8db62, #fff8e7);
+    background: linear-gradient(135deg, #3E4F69, #E8DB62);
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
+    color: white;
+    font-size: 18px;
+    text-align: center;
+    padding: 40px;
 }
-.logoimg{
-    width: 100px;
-    margin-left: 100px
+
+.auth-illustration__text {
+    max-width: 80%;
+    font-weight: bold;
+}
+
+.logoimg {
+    width: 80px;
 }

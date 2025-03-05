@@ -11,10 +11,10 @@ export default function Auth({ setUser }) {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate(); // For redirection
+    const navigate = useNavigate();
 
     const handleAuth = async () => {
-        setError(""); // Clear previous errors
+        setError("");
 
         if (!username || !password || (!isLogin && !email)) {
             setError("All fields are required!");
@@ -25,19 +25,15 @@ export default function Auth({ setUser }) {
             const endpoint = isLogin ? "/auth/login" : "/auth/signup";
             const response = await axios.post(`http://localhost:5000${endpoint}`, {
                 username,
-                email: isLogin ? undefined : email, // Only send email for signup
+                email: isLogin ? undefined : email,
                 password,
             });
 
-            // Store username in localStorage
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("username", response.data.username);
             setUser(response.data.username);
-
-            // Redirect to ChatRoom after login/signup
             navigate("/chat");
         } catch (err) {
-            console.error("Auth Error:", err.response?.data || err.message);
             setError(err.response?.data?.message || "Authentication failed.");
         }
     };
@@ -48,11 +44,9 @@ export default function Auth({ setUser }) {
                 <img src={Logo} className="logoimg" alt="Logo" />
             </div>
             <div className="container">
-                <div className={`auth-form__container ${isLogin ? "right" : "left"}`}>
-                    <h2 className="auth-form__header">{isLogin ? "Log in" : "Create an account"}</h2>
-                    <p className="auth-form__subheader">
-                        {isLogin ? "Welcome back!" : "Let's get started!"}
-                    </p>
+                <div className="auth-form__container">
+                    <h2 className="auth-form__header">{isLogin ? "Log in" : "Sign up"}</h2>
+                    <p className="auth-form__subheader">{isLogin ? "Welcome to ChatApp!" : "Join us today!"}</p>
 
                     <label className="auth-form__label">Username</label>
                     <input
@@ -85,19 +79,14 @@ export default function Auth({ setUser }) {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                        <span
-                            className="auth-form__eye-icon"
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
+                        <span className="auth-form__eye-icon" onClick={() => setShowPassword(!showPassword)}>
                             {showPassword ? "🙈" : "👁"}
                         </span>
                     </div>
 
                     {error && <p className="auth-error">{error}</p>}
 
-                    <button className="auth-form__button" onClick={handleAuth}>
-                        {isLogin ? "Log in" : "Sign up"}
-                    </button>
+                    <button className="auth-form__button" onClick={handleAuth}>{isLogin ? "Log in" : "Sign up"}</button>
 
                     <p>
                         {isLogin ? "Don't have an account? " : "Already have an account? "}
@@ -105,10 +94,6 @@ export default function Auth({ setUser }) {
                             {isLogin ? "Sign up" : "Log in"}
                         </a>
                     </p>
-                </div>
-
-                <div className="auth-illustration__container">
-                    {/* You can add some images, animations, or illustrations here */}
                 </div>
             </div>
         </div>

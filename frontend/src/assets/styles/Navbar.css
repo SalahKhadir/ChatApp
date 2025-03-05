@@ -1,5 +1,6 @@
 .navbar {
     background-color: #FFDB58;
+    box-shadow: 0px 4px 10px rgb(88, 70, 8);
     padding: 16px;
     height: 88px;
     display: flex;
